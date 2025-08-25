@@ -4,21 +4,6 @@ Este documento descreve os code smells identificados no projeto **Adote Fácil**
 
 ---
 
-## 1. Desestruturação excessiva de objetos
-
-### Trecho Original
-
-```javascript
-const { name, email, password } = req.body;
-const user = await User.create({
-	data: {
-		name,
-		email,
-		password,
-	},
-});
-```
-
 ### Smell Identificado
 
 -   **Desestruturação excessiva de objetos**:  
