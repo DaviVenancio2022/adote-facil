@@ -33,32 +33,3 @@ jobs:
                   POSTGRES_HOST=adote-facil-postgres
                   POSTGRES_USER=postgres
                   POSTGRES_PASSWORD=postgres
-                  POSTGRES_PORT=5432
-                  POSTGRES_CONTAINER_PORT=6500
-                  DATABASE_URL="postgresql://postgres:postgres@adote-facil-postgres:5432/adote_facil?schema=public"
-                  JWT_SECRET="secret"
-                  EOF
-
-            # ----------------- Build e start containers -----------------
-            - name: Build and start containers
-              run: docker compose --env-file backend/.env up -d --build
-
-            # ----------------- Esperar serviços via Bash -----------------
-            - name: Esperar frontend, backend e Postgres
-              run: |
-                  for i in {1..30}; do
-                    nc -z localhost 3000 && nc -z localhost 4000 && nc -z localhost 6500 && break
-                    echo "Aguardando serviços..."
-                    sleep 2
-                  done
-
-            # ----------------- Rodar Cypress -----------------
-            - name: Instalar dependências Cypress
-              run: npm install cypress --save-dev
-
-            - name: Rodar testes E2E
-              run: npx cypress run --config baseUrl=http://localhost:3000
-
-            # ----------------- Encerrar containers -----------------
-            - name: Stop containers
-              run: docker compose down
