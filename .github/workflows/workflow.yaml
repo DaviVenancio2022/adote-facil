@@ -1,3 +1,5 @@
+name: Build, Test and E2E
+
 on:
     push:
         branches: ["main"]
@@ -14,23 +16,25 @@ jobs:
                 options: --privileged
 
         steps:
-            # ----------------- Setup -----------------
-            - name: Checkout repo
+            # ----------------- Checkout -----------------
+            - name: Checkout repository
               uses: actions/checkout@v4
 
+            # ----------------- Set up Docker Buildx -----------------
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
-            # ----------------- Build containers -----------------
+            # ----------------- Build e start containers usando .env existente -----------------
             - name: Build and start containers
-              run: docker compose up -d --build
+              run: docker compose --env-file backend/.env up -d --build
 
-            # ----------------- Wait for services using dockerize -----------------
-            - name: Wait for frontend and backend
+            # ----------------- Esperar serviços com dockerize -----------------
+            - name: Esperar frontend, backend e Postgres
               run: |
-                  apk add --no-cache dockerize   # instala dockerize no container runner
+                  apk add --no-cache dockerize
                   dockerize -wait tcp://localhost:3000 -timeout 60s
                   dockerize -wait tcp://localhost:4000 -timeout 60s
+                  dockerize -wait tcp://localhost:6500 -timeout 60s   # porta do Postgres do .env
 
             # ----------------- Rodar Cypress -----------------
             - name: Instalar dependências Cypress
