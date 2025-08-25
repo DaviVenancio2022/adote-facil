@@ -1,5 +1,3 @@
-name: CI Pipeline
-
 on:
     push:
         branches: ["main"]
@@ -13,7 +11,7 @@ jobs:
         services:
             docker:
                 image: docker:20.10-dind
-                privileged: true
+                options: --privileged
 
         steps:
             # ----------------- Setup -----------------
@@ -27,12 +25,12 @@ jobs:
             - name: Build and start containers
               run: docker compose up -d --build
 
-            - name: Wait for services
+            # ----------------- Wait for services using dockerize -----------------
+            - name: Wait for frontend and backend
               run: |
-                  echo "Aguardando frontend e backend..."
-                  sleep 30
-                  curl -f http://localhost:3000 || exit 1
-                  curl -f http://localhost:4000 || exit 1
+                  apk add --no-cache dockerize   # instala dockerize no container runner
+                  dockerize -wait tcp://localhost:3000 -timeout 60s
+                  dockerize -wait tcp://localhost:4000 -timeout 60s
 
             # ----------------- Rodar Cypress -----------------
             - name: Instalar dependências Cypress
