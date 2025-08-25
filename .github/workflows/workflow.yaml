@@ -1,0 +1,35 @@
+name: Build, Test and E2E
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    build-test:
+        runs-on: ubuntu-latest
+
+        services:
+            docker:
+                image: docker:20.10-dind
+                options: --privileged
+
+        steps:
+            # ----------------- Checkout -----------------
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            # ----------------- Set up Docker Buildx -----------------
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            # ----------------- Criar arquivo .env dinamicamente -----------------
+            - name: Criar arquivo .env para backend
+              run: |
+                  mkdir -p backend
+                  cat <<EOF > backend/.env
+                  POSTGRES_DB=adote_facil
+                  POSTGRES_HOST=adote-facil-postgres
+                  POSTGRES_USER=postgres
+                  POSTGRES_PASSWORD=postgres
