@@ -43,13 +43,14 @@ jobs:
             - name: Build and start containers
               run: docker compose --env-file backend/.env up -d --build
 
-            # ----------------- Esperar serviços com dockerize -----------------
+            # ----------------- Esperar serviços via Bash -----------------
             - name: Esperar frontend, backend e Postgres
               run: |
-                  apk add --no-cache dockerize
-                  dockerize -wait tcp://localhost:3000 -timeout 60s
-                  dockerize -wait tcp://localhost:4000 -timeout 60s
-                  dockerize -wait tcp://localhost:6500 -timeout 60s
+                  for i in {1..30}; do
+                    nc -z localhost 3000 && nc -z localhost 4000 && nc -z localhost 6500 && break
+                    echo "Aguardando serviços..."
+                    sleep 2
+                  done
 
             # ----------------- Rodar Cypress -----------------
             - name: Instalar dependências Cypress
