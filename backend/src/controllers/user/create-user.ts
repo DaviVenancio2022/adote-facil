@@ -1,29 +1,28 @@
-import { Request, Response } from 'express'
-import {
-  CreateUserService,
-  createUserServiceInstance,
-} from '../../services/user/create-user.js'
+import { Request, Response } from "express";
+import { CreateUserService, createUserServiceInstance } from "../../services/user/create-user.js"; // Verifique se o caminho está correto
 
 class CreateUserController {
-  constructor(private readonly createUser: CreateUserService) {}
+	constructor(private readonly createUser: CreateUserService) {}
 
-  async handle(request: Request, response: Response): Promise<Response> {
-    const { name, email, password } = request.body
+	async handle(request: Request, response: Response): Promise<Response> {
+		const { name, email, password } = request.body;
 
-    try {
-      const result = await this.createUser.execute({ name, email, password })
+		if (!name || !email || !password) {
+			return response.status(400).json({ error: "Dados incompletos." });
+		}
 
-      const statusCode = result.isFailure() ? 400 : 201
+		try {
+			const result = await this.createUser.execute({ name, email, password });
 
-      return response.status(statusCode).json(result.value)
-    } catch (err) {
-      const error = err as Error
-      console.log({ error })
-      return response.status(500).json({ error: error.message })
-    }
-  }
+			const statusCode = result.isFailure() ? 400 : 201;
+
+			return response.status(statusCode).json(result.value);
+		} catch (err) {
+			const error = err as Error;
+			console.error("Erro ao criar usuário:", error.message);
+			return response.status(500).json({ error: error.message });
+		}
+	}
 }
 
-export const createUserControllerInstance = new CreateUserController(
-  createUserServiceInstance,
-)
+export const createUserControllerInstance = new CreateUserController(createUserServiceInstance);
